@@ -21,33 +21,47 @@ namespace ProgressiveFleaMarket.Classes
         {
             int itemLevelRequired = 1;
 
-            if (item is ArmoredEquipmentItemClass) itemLevelRequired = Math.Max(GetLevelForArmorItem((ArmoredEquipmentItemClass)item), itemLevelRequired);
-
-            if (item is ArmorPlateItemClass) itemLevelRequired = Math.Max(GetLevelForArmorPlate((ArmorPlateItemClass)item), itemLevelRequired);
-
-            if (item is KeyItemClass) itemLevelRequired = Math.Max(GetLevelForKey((KeyItemClass)item), itemLevelRequired);
-
-            if (item is BackpackItemClass) itemLevelRequired = Math.Max(GetLevelForBackpack((BackpackItemClass)item), itemLevelRequired);
-
-            if (item is AmmoItemClass) itemLevelRequired = Math.Max(GetLevelForAmmo((AmmoItemClass)item), itemLevelRequired);
-
-            if (item is ThrowWeapItemClass) itemLevelRequired = Math.Max(GetLevelForGrenade((ThrowWeapItemClass)item), itemLevelRequired);
-
-            Plugin.PGMConfig.ForcedLevels.TryGetValue(item.TemplateId, out int ForcedLevel);
-
-            foreach (var item1 in Plugin.PGMConfig.ForcedLevels)
+            switch (item)
             {
-                if (item.Template.IsChildOf(item1.Key))
+                case ArmorPlateItemClass armorPlateItem:
+                    itemLevelRequired = Math.Max(GetLevelForArmorPlate(armorPlateItem), itemLevelRequired);
+                    break;
+                case ArmoredEquipmentItemClass armoredItem:
+                    itemLevelRequired = Math.Max(GetLevelForArmorItem(armoredItem), itemLevelRequired);
+                    break;
+                case KeyItemClass keyItem:
+                    itemLevelRequired = Math.Max(GetLevelForKey(keyItem), itemLevelRequired);
+                    break;
+                case BackpackItemClass backpackItem:
+                    itemLevelRequired = Math.Max(GetLevelForBackpack(backpackItem), itemLevelRequired);
+                    break;
+                case AmmoItemClass ammoItem:
+                    itemLevelRequired = Math.Max(GetLevelForAmmo(ammoItem), itemLevelRequired);
+                    break;
+                case ThrowWeapItemClass throwWeaponItem:
+                    itemLevelRequired = Math.Max(GetLevelForGrenade(throwWeaponItem), itemLevelRequired);
+                    break;
+            }
+
+            Plugin.PGMConfig.ForcedLevels.TryGetValue(item.TemplateId, out int forcedLevel);
+
+            foreach (var forcedLevelEntry in Plugin.PGMConfig.ForcedLevels)
+            {
+                if (item.Template.IsChildOf(forcedLevelEntry.Key))
                 {
-                    ForcedLevel = item1.Value;
+                    forcedLevel = forcedLevelEntry.Value;
                 }
             }
 
-            if (ForcedLevel > 0) itemLevelRequired = ForcedLevel;
+            if (forcedLevel > 0)
+            {
+                itemLevelRequired = forcedLevel;
+            }
 
             return itemLevelRequired;
         }
-        
+
+
         private static int GetLevelForArmorItem(ArmoredEquipmentItemClass item)
         {
             if (item.Armor == null) return 1;
